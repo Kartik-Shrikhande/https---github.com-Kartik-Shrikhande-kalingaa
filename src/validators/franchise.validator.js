@@ -1,12 +1,11 @@
-const { body, param } = require("express-validator");
+const { body } = require("express-validator");
 
-exports.createFranchiseValidator = [
-  body("name").notEmpty().withMessage("Franchise name is required"),
-  body("contactNumber").optional().isMobilePhone(),
+exports.createFranchiseValidator = () => [
+  body("name").notEmpty().withMessage("Franchise name required"),
+  body("location").notEmpty().withMessage("Location required"),
 ];
 
-exports.updateFranchiseValidator = [
-  param("id").isMongoId(),
+exports.updateFranchiseValidator = () => [
   body("name").optional().notEmpty(),
-  body("contactNumber").optional().isMobilePhone(),
+  body("location").optional().notEmpty(),
 ];

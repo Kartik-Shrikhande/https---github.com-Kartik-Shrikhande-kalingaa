@@ -1,13 +1,13 @@
-// const router = require("express").Router();
-// const { login } = require("../controllers/auth.controller");
-// const { loginValidator } = require("../validators/auth.validator");
-// const { validationResult } = require("express-validator");
+const router = require("express").Router();
+const authController = require("../controllers/auth.controller");
+const authMiddleware = require("../middlewares/auth.middleware");
+const { authenticateUser } = require("../middlewares/auth.middleware");
+const { validationResult } = require("express-validator");
 
-// router.post("/login", loginValidator, (req, res, next) => {
-//   const errors = validationResult(req);
-//   if (!errors.isEmpty())
-//     return res.status(400).json({ errors: errors.array() });
-//   next();
-// }, login);
 
-// module.exports = router;
+router.post("/login", authController.login);
+router.post("/refresh-token", authMiddleware.refreshToken);
+router.get("/verify",authMiddleware.verifyToken);
+
+module.exports = router;
+

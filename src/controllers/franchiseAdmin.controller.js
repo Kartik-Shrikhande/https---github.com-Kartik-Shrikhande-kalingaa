@@ -1,15 +1,44 @@
 const bcrypt = require("bcryptjs");
 const FranchiseAdmin = require("../models/franchiseAdmin.model");
-
+const Franchise = require("../models/franchise.model");
 /* ======================
    CREATE FRANCHISE ADMIN
 ====================== */
+
+
 exports.create = async (req, res) => {
   try {
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const { email, password, franchiseId } = req.body;
 
+    // ✅ Normalize email
+    const normalizedEmail = email.toLowerCase();
+
+    // ❌ Check franchise existence
+    const franchiseExists = await Franchise.findById(franchiseId);
+    if (!franchiseExists) {
+      return res.status(400).json({
+        message: "Invalid franchiseId. Franchise does not exist."
+      });
+    }
+
+    // ❌ Check duplicate email (case-insensitive)
+    const emailExists = await FranchiseAdmin.findOne({
+      email: normalizedEmail
+    });
+
+    if (emailExists) {
+      return res.status(409).json({
+        message: "Email already exists"
+      });
+    }
+
+    // 🔐 Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // ✅ Create admin
     const admin = await FranchiseAdmin.create({
       ...req.body,
+      email: normalizedEmail,
       password: hashedPassword
     });
 
@@ -20,6 +49,7 @@ exports.create = async (req, res) => {
         password: undefined
       }
     });
+
   } catch (error) {
     return res.status(500).json({
       message: "Failed to create Franchise Admin",
@@ -27,6 +57,7 @@ exports.create = async (req, res) => {
     });
   }
 };
+
 
 /* ======================
    GET ALL FRANCHISE ADMINS

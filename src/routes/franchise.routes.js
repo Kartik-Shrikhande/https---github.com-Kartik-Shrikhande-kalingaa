@@ -1,16 +1,16 @@
 const router = require("express").Router();
-const auth = require("../middlewares/auth.middleware");
-const role = require("../middlewares/role.middleware");
+const { authenticateUser } = require("../middlewares/auth.middleware");
+const { authorizeRoles } = require("../middlewares/role.middleware");
 const { validationResult } = require("express-validator");
 
 const controller = require("../controllers/franchise.controller");
 const validator = require("../validators/franchise.validator");
 
-// router.use(auth, role("SuperAdmin"));
+router.use(authenticateUser, authorizeRoles(["SuperAdmin"]));
 
 router.post(
   "/create",
-  validator.createFranchiseValidator,
+  validator.createFranchiseValidator(),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty())
@@ -25,7 +25,7 @@ router.get("/get/:id", controller.getById);
 
 router.put(
   "/update/:id",
-  validator.updateFranchiseValidator,
+  validator.updateFranchiseValidator(),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty())
@@ -38,3 +38,4 @@ router.put(
 router.delete("/delete/:id", controller.remove);
 
 module.exports = router;
+

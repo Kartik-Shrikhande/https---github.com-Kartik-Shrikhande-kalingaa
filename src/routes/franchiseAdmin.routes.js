@@ -1,16 +1,16 @@
 const router = require("express").Router();
-const auth = require("../middlewares/auth.middleware");
-const role = require("../middlewares/role.middleware");
+const { authenticateUser } = require("../middlewares/auth.middleware");
+const { authorizeRoles } = require("../middlewares/role.middleware");
 const { validationResult } = require("express-validator");
 
 const controller = require("../controllers/franchiseAdmin.controller");
 const validator = require("../validators/franchiseAdmin.validator");
 
-// router.use(auth, role("SuperAdmin"));
+router.use(authenticateUser, authorizeRoles(["SuperAdmin"]));
 
 router.post(
   "/create",
-  validator.createFranchiseAdminValidator,
+  validator.createFranchiseAdminValidator(),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty())
@@ -25,7 +25,7 @@ router.get("/get/:id", controller.getById);
 
 router.put(
   "/update/:id",
-  validator.updateFranchiseAdminValidator,
+  validator.updateFranchiseAdminValidator(),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty())

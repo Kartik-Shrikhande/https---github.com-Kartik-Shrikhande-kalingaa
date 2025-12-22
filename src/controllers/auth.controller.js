@@ -5,37 +5,77 @@ const SuperAdmin = require("../models/superAdmin.model");
 const FranchiseAdmin = require("../models/franchiseAdmin.model");
 const FrontOffice = require("../models/frontOffice.model");
 const LabTechnician = require("../models/labTechnician.model");
-const Patient = require("../models/patient.model");
 
 exports.login = async (req, res) => {
-  const { role, email, mobile, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  let Model;
-  if (role === "SuperAdmin") Model = SuperAdmin;
-  if (role === "FranchiseAdmin") Model = FranchiseAdmin;
-  if (role === "FrontOffice") Model = FrontOffice;
-  if (role === "LabTechnician") Model = LabTechnician;
-  if (role === "Patient") Model = Patient;
+    // ❌ Validate input
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password are required"
+      });
+    }
 
-  if (!Model) return res.status(400).json({ message: "Invalid role" });
+    // 🔍 Auto-detect role
+    let user = await SuperAdmin.findOne({ email });
+    let role = "SuperAdmin";
 
-  const user = role === "Patient"
-    ? await Model.findOne({ mobile })
-    : await Model.findOne({ email });
+    if (!user) {
+      user = await FranchiseAdmin.findOne({ email });
+      role = "FranchiseAdmin";
+    }
 
-  if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      user = await FrontOffice.findOne({ email });
+      role = "FrontOffice";
+    }
 
-  if (role !== "Patient") {
+    if (!user) {
+      user = await LabTechnician.findOne({ email });
+      role = "LabTechnician";
+    }
+
+    // ❌ User not found
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found"
+      });
+    }
+
+    // ❌ Password check
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch)
-      return res.status(401).json({ message: "Invalid credentials" });
+    if (!isMatch) {
+      return res.status(401).json({
+        message: "Invalid credentials"
+      });
+    }
+
+    // ✅ Generate JWT
+    const token = generateToken({
+      id: user._id,
+      role,
+      franchiseId: user.franchiseId || null
+    });
+
+    // ✅ SET TOKEN IN COOKIE (KEY PART)
+    res.cookie("refreshtoken", token, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false // set true in production (HTTPS)
+    });
+
+    // ✅ Response (NO TOKEN REQUIRED ON CLIENT)
+    return res.status(200).json({
+      message: "Login successful",
+      role,
+      token: token
+    });
+
+  } catch (error) {
+    console.error("Login error:", error);
+    return res.status(500).json({
+      message: "Login failed"
+    });
   }
-
-  const token = generateToken({
-    id: user._id,
-    role,
-    franchiseId: user.franchiseId || null
-  });
-
-  res.json({ token });
 };
