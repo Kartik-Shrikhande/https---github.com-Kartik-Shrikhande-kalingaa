@@ -4,16 +4,16 @@ const frontOfficeSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true
+      required: true,
+      trim: true
     },
 
     email: {
       type: String,
-      unique: true
-    },
-
-    mobile: {
-      type: String
+      required: true,
+      unique: true,
+      lowercase: true, // ✅ auto lowercase
+      trim: true
     },
 
     password: {
@@ -21,9 +21,9 @@ const frontOfficeSchema = new mongoose.Schema(
       required: true
     },
 
-    role: {
+    phone: {
       type: String,
-      default: "FrontOffice"
+      required: true
     },
 
     franchiseId: {
