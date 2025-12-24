@@ -15,6 +15,9 @@ const franchiseAdminRoute = require('../src/routes/franchiseAdmin.routes')
 const AuthRoute = require('../src/routes/auth.routes')
 const frontOfficeRoute = require("./routes/frontOffice.routes");
 
+const labTechnicianRoute = require("./routes/labTechnician.routes");
+
+
 
 
 // Middleware
@@ -27,6 +30,7 @@ app.use('/api/superadmin', superAdminRoute)
 app.use('/api/franchise', franchiseRoute)
 app.use('/api/franchise/admin', franchiseAdminRoute)
 app.use("/api/front-office", frontOfficeRoute);
+app.use("/api/labtechnician", labTechnicianRoute);
 app.use('/api/auth', AuthRoute)
 // Routes
 // app.use("/api/auth", require("./routes/auth.routes"));

@@ -4,34 +4,28 @@ const labTechnicianSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true
+      required: true,
+      trim: true
     },
-
     email: {
       type: String,
+      required: true,
+      lowercase: true,
       unique: true
     },
-
-    mobile: {
-      type: String
-    },
-
     password: {
       type: String,
       required: true
     },
-
-    role: {
+    phone: {
       type: String,
-      default: "LabTechnician"
+      required: true
     },
-
     franchiseId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Franchise",
       required: true
     },
-
     isActive: {
       type: Boolean,
       default: true
