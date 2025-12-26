@@ -4,34 +4,35 @@ const patientSchema = new mongoose.Schema(
   {
     name: {
       type: String,
+      required: true,
+      trim: true
+    },
+    email: {
+      type: String,
+      lowercase: true,
+      trim: true
+    },
+    phone: {
+      type: String,
       required: true
     },
-
-    mobile: {
-      type: String,
-      required: true,
-      index: true
+    age: {
+      type: Number,
+      required: true
     },
-
-    age:{type: Number} ,
-
     gender: {
       type: String,
-      enum: ["Male", "Female", "Other"]
+      enum: ["Male", "Female", "Other"],
+      required: true
     },
-
-    address:  {
+    address: {
       type: String
     },
-
     franchiseId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Franchise",
       required: true
     },
-
-    lastOtpSentAt:{type: Date},
-
     isActive: {
       type: Boolean,
       default: true
