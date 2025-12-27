@@ -16,7 +16,7 @@ const AuthRoute = require('../src/routes/auth.routes')
 const frontOfficeRoute = require("./routes/frontOffice.routes");
 const labTechnicianRoute = require("./routes/labTechnician.routes");
 const patientRoute = require("./routes/patient.routes");
-
+const testRoute = require("./routes/test.routes");
 
 
 
@@ -32,6 +32,7 @@ app.use('/api/franchise/admin', franchiseAdminRoute)
 app.use("/api/front-office", frontOfficeRoute);
 app.use("/api/labtechnician", labTechnicianRoute);
 app.use("/api/patient", patientRoute);
+app.use("/api/test", testRoute);
 app.use('/api/auth', AuthRoute)
 // Routes
 // app.use("/api/auth", require("./routes/auth.routes"));
