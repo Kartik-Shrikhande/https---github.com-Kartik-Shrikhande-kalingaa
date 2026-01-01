@@ -1,4 +1,8 @@
 const Patient = require("../models/patient.model");
+const jwt = require("jsonwebtoken");
+
+const { generateToken } = require("../utils/jwt");
+
 
 exports.create = async (req, res) => {
   try {
@@ -92,4 +96,47 @@ exports.remove = async (req, res) => {
   return res.status(200).json({
     message: "Patient deleted successfully"
   });
+};
+
+
+
+
+exports.patientLogin = async (req, res) => {
+  try {
+    const { phone } = req.body;
+
+    if (!phone) {
+      return res.status(400).json({
+        message: "Phone number is required"
+      });
+    }
+
+    const patient = await Patient.findOne({
+      phone,
+      isActive: true
+    });
+
+    if (!patient) {
+      return res.status(404).json({
+        message: "Patient not found"
+      });
+    }
+
+    const token = generateToken({
+      id: patient._id,
+      role: "Patient",
+      franchiseId: patient.franchiseId
+    });
+
+    return res.status(200).json({
+      message: "Patient login successful",
+      role: "Patient",
+      token
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      message: "Patient login failed"
+    });
+  }
 };

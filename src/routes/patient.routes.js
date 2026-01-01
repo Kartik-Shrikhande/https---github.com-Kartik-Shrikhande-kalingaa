@@ -5,6 +5,11 @@ const { validationResult } = require("express-validator");
 
 const controller = require("../controllers/patient.controller");
 const validator = require("../validators/patient.validator");
+const jwt = require("jsonwebtoken");
+
+const { generateToken } = require("../utils/jwt");
+
+router.post("/login", controller.patientLogin);
 
 router.use(
   authenticateUser,

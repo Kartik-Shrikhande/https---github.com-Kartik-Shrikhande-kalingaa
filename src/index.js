@@ -17,6 +17,8 @@ const frontOfficeRoute = require("./routes/frontOffice.routes");
 const labTechnicianRoute = require("./routes/labTechnician.routes");
 const patientRoute = require("./routes/patient.routes");
 const testRoute = require("./routes/test.routes");
+const appointmentRoute = require("./routes/appointment.routes");
+
 
 
 
@@ -34,6 +36,7 @@ app.use("/api/labtechnician", labTechnicianRoute);
 app.use("/api/patient", patientRoute);
 app.use("/api/test", testRoute);
 app.use('/api/auth', AuthRoute)
+app.use("/api/appointment", appointmentRoute);
 // Routes
 // app.use("/api/auth", require("./routes/auth.routes"));
 
