@@ -1,5 +1,5 @@
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const { generateToken } = require("../utils/jwt");
 
 const SuperAdmin = require("../models/superAdmin.model");
 const FranchiseAdmin = require("../models/franchiseAdmin.model");
@@ -10,14 +10,10 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // ❌ Validate input
     if (!email || !password) {
-      return res.status(400).json({
-        message: "Email and password are required"
-      });
+      return res.status(400).json({ message: "Email and password are required" });
     }
 
-    // 🔍 Auto-detect role
     let user = await SuperAdmin.findOne({ email });
     let role = "SuperAdmin";
 
@@ -25,57 +21,52 @@ exports.login = async (req, res) => {
       user = await FranchiseAdmin.findOne({ email });
       role = "FranchiseAdmin";
     }
-
     if (!user) {
       user = await FrontOffice.findOne({ email });
       role = "FrontOffice";
     }
-
     if (!user) {
       user = await LabTechnician.findOne({ email });
       role = "LabTechnician";
     }
 
-    // ❌ User not found
     if (!user) {
-      return res.status(404).json({
-        message: "User not found"
-      });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    // ❌ Password check
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({
-        message: "Invalid credentials"
-      });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // ✅ Generate JWT
-    const token = generateToken({
-      id: user._id,
-      role,
-      franchiseId: user.franchiseId || null
-    });
+    // 🔐 ACCESS TOKEN
+    const accessToken = jwt.sign(
+      { id: user._id, role, franchiseId: user.franchiseId || null },
+      process.env.JWT_SECRET,
+      { expiresIn: "1m" }
+    );
 
-    // ✅ SET TOKEN IN COOKIE (KEY PART)
-    res.cookie("refreshtoken", token, {
+    // 🔁 REFRESH TOKEN
+    const refreshToken = jwt.sign(
+      { id: user._id, role, franchiseId: user.franchiseId || null },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.cookie("refreshtoken", refreshToken, {
       httpOnly: true,
       sameSite: "lax",
-      secure: false // set true in production (HTTPS)
+      secure: false // true in production
     });
 
-    // ✅ Response (NO TOKEN REQUIRED ON CLIENT)
     return res.status(200).json({
       message: "Login successful",
       role,
-      token: token
+      accessToken
     });
 
   } catch (error) {
     console.error("Login error:", error);
-    return res.status(500).json({
-      message: "Login failed"
-    });
+    return res.status(500).json({ message: "Login failed" });
   }
 };
