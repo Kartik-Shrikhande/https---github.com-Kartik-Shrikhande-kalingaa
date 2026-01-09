@@ -4,6 +4,7 @@ const app = express()
 const mongoose = require('mongoose')
 const dotenv = require('dotenv')
 dotenv.config()
+const cors = require('cors'); 
 
 
 const cookieParser = require("cookie-parser");
@@ -23,7 +24,7 @@ const appointmentRoute = require("./routes/appointment.routes");
 
 
 // Middleware
-
+app.use(cors());
 app.use(cookieParser());
 app.use(express.json()) 
 
