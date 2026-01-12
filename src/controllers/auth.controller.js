@@ -43,7 +43,7 @@ exports.login = async (req, res) => {
     const accessToken = jwt.sign(
       { id: user._id, role, franchiseId: user.franchiseId || null },
       process.env.JWT_SECRET,
-      { expiresIn: "1m" }
+      { expiresIn: "1h" }
     );
 
     // 🔁 REFRESH TOKEN
