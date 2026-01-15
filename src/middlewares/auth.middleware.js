@@ -5,16 +5,13 @@ const FrontOffice = require("../models/frontOffice.model");
 const LabTechnician = require("../models/labTechnician.model");
 
 /* 🔐 AUTHENTICATE USER */
-
-
 exports.authenticateUser = (req, res, next) => {
   try {
-    const { token } = req.body;
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(" ")[1];
 
     if (!token) {
-      return res.status(401).json({
-        message: "Token is required in request body"
-      });
+      return res.status(401).json({ message: "Token is required" });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -22,17 +19,41 @@ exports.authenticateUser = (req, res, next) => {
     req.user = {
       id: decoded.id,
       role: decoded.role,
-      franchiseId: decoded.franchiseId || null
+      franchiseId: decoded.franchiseId || null,
     };
 
     next();
   } catch (error) {
-    console.error("JWT verify error:", error.message);
-    return res.status(401).json({
-      message: "Invalid or expired token"
-    });
+    return res.status(401).json({ message: "Invalid or expired token" });
   }
 };
+
+// exports.authenticateUser = (req, res, next) => {
+//   try {
+//     const { token } = req.body;
+
+//     if (!token) {
+//       return res.status(401).json({
+//         message: "Token is required in request body"
+//       });
+//     }
+
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+//     req.user = {
+//       id: decoded.id,
+//       role: decoded.role,
+//       franchiseId: decoded.franchiseId || null
+//     };
+
+//     next();
+//   } catch (error) {
+//     console.error("JWT verify error:", error.message);
+//     return res.status(401).json({
+//       message: "Invalid or expired token"
+//     });
+//   }
+// };
 
 // exports.authenticateUser = (req, res, next) => {
 //   try {
