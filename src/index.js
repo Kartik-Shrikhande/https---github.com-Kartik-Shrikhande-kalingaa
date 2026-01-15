@@ -24,7 +24,13 @@ const appointmentRoute = require("./routes/appointment.routes");
 
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: true, // reflects request origin
+    credentials: true,
+  })
+);
+
 app.use(cookieParser());
 app.use(express.json()) 
 
