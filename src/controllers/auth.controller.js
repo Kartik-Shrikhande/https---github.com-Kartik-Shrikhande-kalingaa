@@ -5,7 +5,6 @@ const SuperAdmin = require("../models/superAdmin.model");
 const FranchiseAdmin = require("../models/franchiseAdmin.model");
 const FrontOffice = require("../models/frontOffice.model");
 const LabTechnician = require("../models/labTechnician.model");
-
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -17,36 +16,21 @@ exports.login = async (req, res) => {
     let user = await SuperAdmin.findOne({ email });
     let role = "SuperAdmin";
 
-    if (!user) {
-      user = await FranchiseAdmin.findOne({ email });
-      role = "FranchiseAdmin";
-    }
-    if (!user) {
-      user = await FrontOffice.findOne({ email });
-      role = "FrontOffice";
-    }
-    if (!user) {
-      user = await LabTechnician.findOne({ email });
-      role = "LabTechnician";
-    }
+    if (!user) { user = await FranchiseAdmin.findOne({ email }); role = "FranchiseAdmin"; }
+    if (!user) { user = await FrontOffice.findOne({ email }); role = "FrontOffice"; }
+    if (!user) { user = await LabTechnician.findOne({ email }); role = "LabTechnician"; }
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
+    if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
 
-    // 🔐 ACCESS TOKEN
     const accessToken = jwt.sign(
       { id: user._id, role, franchiseId: user.franchiseId || null },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    // 🔁 REFRESH TOKEN
     const refreshToken = jwt.sign(
       { id: user._id, role, franchiseId: user.franchiseId || null },
       process.env.JWT_REFRESH_SECRET,
@@ -56,7 +40,7 @@ exports.login = async (req, res) => {
     res.cookie("refreshtoken", refreshToken, {
       httpOnly: true,
       sameSite: "lax",
-      secure: false // true in production
+      secure: false
     });
 
     return res.status(200).json({
@@ -66,7 +50,7 @@ exports.login = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Login error:", error);
     return res.status(500).json({ message: "Login failed" });
   }
 };
+

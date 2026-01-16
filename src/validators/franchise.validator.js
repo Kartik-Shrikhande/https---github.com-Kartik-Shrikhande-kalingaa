@@ -2,10 +2,10 @@ const { body } = require("express-validator");
 
 exports.createFranchiseValidator = () => [
   body("name").notEmpty().withMessage("Franchise name required"),
-  body("location").notEmpty().withMessage("Location required"),
+  body("address").notEmpty().withMessage("address required"),
 ];
 
 exports.updateFranchiseValidator = () => [
   body("name").optional().notEmpty(),
-  body("location").optional().notEmpty(),
+  body("address").optional().notEmpty(),
 ];

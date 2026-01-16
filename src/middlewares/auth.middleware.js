@@ -5,28 +5,28 @@ const FrontOffice = require("../models/frontOffice.model");
 const LabTechnician = require("../models/labTechnician.model");
 
 /* 🔐 AUTHENTICATE USER */
-exports.authenticateUser = (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(" ")[1];
+// exports.authenticateUser = (req, res, next) => {
+//   try {
+//     const authHeader = req.headers.authorization;
+//     const token = authHeader && authHeader.split(" ")[1];
 
-    if (!token) {
-      return res.status(401).json({ message: "Token is required" });
-    }
+//     if (!token) {
+//       return res.status(401).json({ message: "Token is required" });
+//     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.user = {
-      id: decoded.id,
-      role: decoded.role,
-      franchiseId: decoded.franchiseId || null,
-    };
+//     req.user = {
+//       id: decoded.id,
+//       role: decoded.role,
+//       franchiseId: decoded.franchiseId || null,
+//     };
 
-    next();
-  } catch (error) {
-    return res.status(401).json({ message: "Invalid or expired token" });
-  }
-};
+//     next();
+//   } catch (error) {
+//     return res.status(401).json({ message: "Invalid or expired token" });
+//   }
+// };
 
 // exports.authenticateUser = (req, res, next) => {
 //   try {
@@ -55,59 +55,39 @@ exports.authenticateUser = (req, res, next) => {
 //   }
 // };
 
-// exports.authenticateUser = (req, res, next) => {
-//   try {
-//     let token = null;
-
-//     // 1️⃣ From Authorization header
-//     if (
-//       req.headers.authorization &&
-//       req.headers.authorization.startsWith("Bearer ")
-//     ) {
-//       token = req.headers.authorization.split(" ")[1];
-//     }
-
-//     // 2️⃣ From body (fallback)
-//     if (!token && req.body?.token) {
-//       token = req.body.token;
-//     }
-
-//     if (!token) {
-//       return res.status(401).json({ message: "No token provided" });
-//     }
-
-//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-//     req.user = {
-//       id: decoded.id,
-//       role: decoded.role,
-//       franchiseId: decoded.franchiseId || null
-//     };
-
-//     next();
-//   } catch (error) {
-//     console.error("JWT verify error:", error.message);
-//     return res.status(401).json({
-//       message: "Invalid or expired token"
-//     });
-//   }
-// };
-
-
-/* 🔁 REFRESH TOKEN */
-exports.refreshToken = async (req, res) => {
+exports.authenticateUser = (req, res, next) => {
   try {
-    const refreshToken =
-      req.cookies?.refreshtoken || req.body.refreshToken;
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(" ")[1];
 
-    if (!refreshToken) {
-      return res.status(401).json({ message: "No refresh token provided" });
+    if (!token) {
+      return res.status(401).json({ message: "Access token required" });
     }
 
-    const decoded = jwt.verify(
-      refreshToken,
-      process.env.JWT_REFRESH_SECRET
-    );
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    req.user = {
+      id: decoded.id,
+      role: decoded.role,
+      franchiseId: decoded.franchiseId || null
+    };
+
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid or expired access token" });
+  }
+};
+
+
+
+exports.refreshToken = async (req, res) => {
+  try {
+    const refreshToken = req.cookies?.refreshtoken;
+    if (!refreshToken) {
+      return res.status(401).json({ message: "No refresh token" });
+    }
+
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
     const newAccessToken = jwt.sign(
       {
@@ -116,18 +96,15 @@ exports.refreshToken = async (req, res) => {
         franchiseId: decoded.franchiseId || null
       },
       process.env.JWT_SECRET,
-      { expiresIn: "15m" }
+      { expiresIn: "1h" }
     );
 
-    return res.status(200).json({
-      accessToken: newAccessToken
-    });
-  } catch (error) {
-    return res.status(403).json({
-      message: "Invalid or expired refresh token"
-    });
+    return res.status(200).json({ accessToken: newAccessToken });
+  } catch {
+    return res.status(403).json({ message: "Invalid refresh token" });
   }
 };
+
 
 /* ✅ VERIFY TOKEN */
 exports.verifyToken = async (req, res) => {
